@@ -1,14 +1,26 @@
 package fiji.plugin.trackmate;
 
+import static fiji.plugin.trackmate.gui.TrackMateWizard.TRACKMATE_ICON;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+
+import java.awt.Component;
+import java.awt.HeadlessException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
-import net.imglib2.meta.ImgPlus;
+import net.imglib2.img.ImgPlus;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -19,6 +31,9 @@ import fiji.plugin.trackmate.features.EdgeFeatureCalculator;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.features.SpotFeatureCalculator;
 import fiji.plugin.trackmate.features.TrackFeatureCalculator;
+import fiji.plugin.trackmate.gui.TrackMateGUIController;
+import fiji.plugin.trackmate.segmentation.ManualSegmenter;
+import fiji.plugin.trackmate.segmentation.Segmenter;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.util.CropImgView;
 import fiji.plugin.trackmate.util.TMUtils;
@@ -425,6 +440,48 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	}
 
 	/**
+	 * Exectute the Segmentation Step
+	 * @return
+	 */
+	public boolean execSegmentation() {
+
+		final Logger logger = model.getLogger();
+		
+		logger.log("Starting segmentation process:\n");
+		
+		logger.setProgress(0);
+		
+		
+		
+		Segmenter activeSegmenter = settings.segmenter;
+		
+		if (activeSegmenter.getKey().equals(ManualSegmenter.SEGMENTER_KEY)) {
+			// Manual Segmenetation
+			activeSegmenter.process();
+			
+		} else {
+			logger.log("  - Segmenter: "+activeSegmenter.getKey()+"\n");
+
+			logger.setProgress(0.1);
+			
+			boolean finished = activeSegmenter.process();
+
+			if (!finished) {
+				logger.log("  - SegmenterError(Process): "+activeSegmenter.getErrorMessage()+"\n");
+				return false;
+			}
+						
+			logger.setProgress(1);
+			logger.log("Segmentation finished\n");
+		}
+		
+		
+		
+		return true;
+	}
+	
+	
+	/**
 	 * Execute the initial spot filtering part.
 	 *<p>
 	 * Because of the presence of noise, it is possible that some of the regional maxima found in the detection step have
@@ -593,7 +650,206 @@ public class TrackMate implements Benchmark, MultiThreaded, Algorithm {
 	public long getProcessingTime() {
 		return processingTime;
 	};
+	
 
+	
+	
+	private int getTypeOf(ImageStack stack) {
+		// TEST DATA-TYPE OF IMAGE
+		Object pixelsTest = stack.getPixels(1);
+		
+		double[] imgChr = null;
+		int type = -1;
+		
+		if (pixelsTest instanceof byte[]) {
+			type = 0;
+			
+			byte[] dataChr = (byte[])pixelsTest;
+			
+			imgChr = new double[dataChr.length];
+			
+			for (int t=0; t<dataChr.length; t++) {
+				imgChr[t] = dataChr[t];
+			}
+			
+		} else if (pixelsTest instanceof short[]) {
+			type = 1;
+			
+			short[] dataChr = (short[])pixelsTest;
+			
+			imgChr = new double[dataChr.length];
+			
+			for (int t=0; t<dataChr.length; t++) {
+				imgChr[t] = dataChr[t];
+			}
+		} else if (pixelsTest instanceof int[]) {
+			type = 2;
+			
+			int[] dataChr = (int[])pixelsTest;
+			
+			imgChr = new double[dataChr.length];
+			
+			for (int t=0; t<dataChr.length; t++) {
+				imgChr[t] = dataChr[t];
+			}
+		} else if (pixelsTest instanceof float[]) {
+			type = 3;
+			
+			float[] dataChr = (float[])pixelsTest;
+			
+			imgChr = new double[dataChr.length];
+			
+			for (int t=0; t<dataChr.length; t++) {
+				imgChr[t] = dataChr[t];
+			}
+		} else {
+			throw new IllegalArgumentException("Unsuported data type");
+		}
+		return type;
+	}
+	
+	private double[] getDoubleOfPixels(ImageStack stack, int i, int imageType) {
+		
+		Object pixels = stack.getPixels(i);
+		
+		double[] doublePixel = null;
+							
+		switch (imageType) {
+			case 0:
+				byte[] byteData = (byte[])pixels;
+				
+				doublePixel = new double[byteData.length];
+				
+				for (int t=0; t<byteData.length; t++) {
+					if (byteData[t]>0) {
+						doublePixel[t] = byteData[t];
+					} else {
+						doublePixel[t] = 256+byteData[t];
+					}
+				}
+				break;
+			case 1:
+				short[] shortData = (short[])pixels;
+				
+				doublePixel = new double[shortData.length];
+				
+				for (int t=0; t<shortData.length; t++) {
+					doublePixel[t] = shortData[t];
+				}
+				break;
+			case 2:
+				int[] intData = (int[])pixels;
+				
+				doublePixel = new double[intData.length];
+				
+				for (int t=0; t<intData.length; t++) {
+					doublePixel[t] = intData[t];
+				}
+				break;
+			case 3:
+				float[] floatData = (float[])pixels;
+				
+				doublePixel = new double[floatData.length];
+				
+				for (int t=0; t<floatData.length; t++) {
+					doublePixel[t] = floatData[t];
+				}
+				break;
+			default:
+				throw new IllegalArgumentException("Unsuproted data type");
+		}
+		return doublePixel;
+				
+	}
+	
+	public ImagePlus getImageAverage(ImagePlus img) {
+		
+		ImageStack stack = img.getStack();
+		int imageType = getTypeOf(stack);
+		double[] pixels = getDoubleOfPixels(stack, 1, imageType);
+		int[] avPixels = new int[pixels.length];
+		int stackSize = stack.getSize();
+		
+		for (int i=2; i<=stackSize; i++) {
+			double[] newPixels = getDoubleOfPixels(stack, i, imageType);
+			
+			for (int j=0; j<Math.min(pixels.length, newPixels.length); j++) {
+				pixels[j] += newPixels[j];
+			}
+		}
+		
+		for (int j=0; j<pixels.length; j++) {
+			avPixels[j] = (int)(pixels[j]/stackSize);
+		}
+		
+		ImageStack avStack = new ImageStack(stack.getWidth(),stack.getHeight());
+		avStack.addSlice("average Image", avPixels);
+		
+		return new ImagePlus("Average Image",avStack);
+		
+	}
+	
+	public ImagePlus loadImage(TrackMateGUIController controller, String title) {
+		File file;
+		JFileChooser fileChooser = new JFileChooser() {
+			private static final long serialVersionUID = 1L;
+			@Override
+		    protected JDialog createDialog( Component parent ) throws HeadlessException {
+		        JDialog dialog = super.createDialog( parent );
+		        dialog.setIconImage( TRACKMATE_ICON.getImage() );
+		        return dialog;
+		    }
+		};
+		fileChooser.setName(title);
+		fileChooser.setSelectedFile(new File(this.settings.imageFolder));
+		FileNameExtensionFilter filter = new FileNameExtensionFilter(title, "tif", "tiff", "dicom", "gif", "jpg", "jpeg");
+		fileChooser.setFileFilter(filter);
+
+		int returnVal = fileChooser.showOpenDialog(controller.getGUI());
+		if(returnVal == JFileChooser.APPROVE_OPTION) {
+			file = fileChooser.getSelectedFile();
+		} else {
+			controller.getGUI().getLogger().log("Load data aborted.\n");
+			return null;  	    		
+		}
+		
+		return new ImagePlus(file.getAbsolutePath());
+	}
+	
+	public void saveImage(TrackMateGUIController controller, ImagePlus imp, String title) {
+		File file;
+		JFileChooser fileChooser = new JFileChooser() {
+			private static final long serialVersionUID = 1L;
+			@Override
+		    protected JDialog createDialog( Component parent ) throws HeadlessException {
+		        JDialog dialog = super.createDialog( parent );
+		        dialog.setIconImage( TRACKMATE_ICON.getImage() );
+		        return dialog;
+		    }
+		};
+		fileChooser.setName(title);
+		fileChooser.setSelectedFile(new File(this.settings.imageFolder));
+		FileNameExtensionFilter filter = new FileNameExtensionFilter(title, "tif", "tiff", "dicom", "gif", "jpg", "jpeg");
+		fileChooser.setFileFilter(filter);
+
+		int returnVal = fileChooser.showSaveDialog(controller.getGUI());
+		if(returnVal == JFileChooser.APPROVE_OPTION) {
+			file = fileChooser.getSelectedFile();
+			
+			String filepath = file.getAbsolutePath();
+			if (!filepath.endsWith(".tif") && !filepath.endsWith(".tiff") && !filepath.endsWith(".dicom") && !filepath.endsWith(".gif") && 
+					!filepath.endsWith(".jpg") && !filepath.endsWith(".jpeg")
+					) {
+				filepath += ".tif";
+				file = new File(filepath);
+			}
+			
+			IJ.save(imp, file.getAbsolutePath());
+		} else {
+			controller.getGUI().getLogger().log("Save image aborted.\n");	
+		}
+	}
+	
 }
 
 

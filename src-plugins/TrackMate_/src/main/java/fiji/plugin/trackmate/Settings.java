@@ -1,7 +1,9 @@
 package fiji.plugin.trackmate;
 
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Roi;
+import ij.gui.StackWindow;
 
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -10,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import fiji.plugin.trackmate.action.CalculatingHistogramAction;
 import fiji.plugin.trackmate.detection.SpotDetector;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureAnalyzer;
@@ -18,6 +21,8 @@ import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
+import fiji.plugin.trackmate.gui.descriptors.RegionSelectDescriptor;
+import fiji.plugin.trackmate.segmentation.Segmenter;
 import fiji.plugin.trackmate.tracking.SpotTracker;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 
@@ -74,6 +79,14 @@ public class Settings {
 	public Map<String, Object> detectorSettings = new HashMap<String, Object>();
 	public Map<String, Object> trackerSettings = new HashMap<String, Object>();
 
+	// Region Data
+	public ImagePlus segmentationImage;
+	public StackWindow segmentationWindow;
+	public ImagePlus regionImage; 
+	public Map<String, List<Integer>> regions = new HashMap<String, List<Integer>>();
+	public Map<String, List<Integer[]>> histograms = new HashMap<String, List<Integer[]>>();
+	public Segmenter segmenter;
+	
 	// Filters
 
 	/**
@@ -550,5 +563,88 @@ public class Settings {
 	}
 
 
+	/*
+	 * Regions
+	 */
+	
+	public void setRegionImage(ImagePlus regionImage) {
+		this.regionImage = regionImage;
+	}
+	
+	public int[][] getRegionInts() {
+		ImageStack stack = regionImage.getStack();
+		if (!(stack.getPixels(1) instanceof int[])){
+			return null;
+		}
+		
+		int[][] regions = new int[width][height];
+		
+		int[] pixels = (int[])stack.getPixels(1);
+		
+		for (int col = 0; col<width; col++) {
+			for (int row = 0; row<height; row++) {
+				regions[col][row] = pixels[row*width+col];
+			}
+		}
+			
+		return regions;
+	}
 
+	public String getMovementCode(int startRegion, int endRegion) {
+		List<Integer> inRegions = regions.get(RegionSelectDescriptor.IN_STRING);
+		List<Integer> backgroundRegions = regions.get(RegionSelectDescriptor.BACKGROUND_STRING);
+		List<Integer> intersectionRegions = regions.get(RegionSelectDescriptor.INTERSECTION_STRING);
+		
+		if (inRegions.contains(startRegion)) {
+			if (inRegions.contains(endRegion)) {
+				return CalculatingHistogramAction.STAY_INSIDE;
+			} else if (backgroundRegions.contains(endRegion)) {
+				return CalculatingHistogramAction.INSIDE_OUT;
+			} else if (intersectionRegions.contains(endRegion)) {
+				return CalculatingHistogramAction.STAY_INSIDE;
+			}
+			
+			return CalculatingHistogramAction.NOCODE;
+		} else if (backgroundRegions.contains(startRegion)){
+			if (inRegions.contains(endRegion)) {
+				return CalculatingHistogramAction.OUTSIDE_IN;
+			} else if (backgroundRegions.contains(endRegion)) {
+				return CalculatingHistogramAction.STAY_OUTSIDE;
+			} else if (intersectionRegions.contains(endRegion)) {
+				return CalculatingHistogramAction.STAY_OUTSIDE;
+			}
+			
+			return CalculatingHistogramAction.NOCODE;
+		} else if (intersectionRegions.contains(startRegion)){
+			if (inRegions.contains(endRegion)) {
+				return CalculatingHistogramAction.STAY_INSIDE;
+			} else if (backgroundRegions.contains(endRegion)) {
+				return CalculatingHistogramAction.STAY_OUTSIDE;
+			} else if (intersectionRegions.contains(endRegion)) {
+				return CalculatingHistogramAction.STAY_INTERSECTING;
+			}
+			
+			return CalculatingHistogramAction.NOCODE;
+		} 
+		return CalculatingHistogramAction.NOCODE;
+	}
+	
+	public String getRegionCode(int region) {
+		List<Integer> inRegions = regions.get(RegionSelectDescriptor.IN_STRING);
+		List<Integer> backgroundRegions = regions.get(RegionSelectDescriptor.BACKGROUND_STRING);
+		List<Integer> intersectionRegions = regions.get(RegionSelectDescriptor.INTERSECTION_STRING);
+		
+		if (inRegions.contains(region)) {
+			return RegionSelectDescriptor.IN_STRING;
+			
+		} else if (backgroundRegions.contains(region)){
+			
+			return RegionSelectDescriptor.BACKGROUND_STRING;
+		} else if (intersectionRegions.contains(region)){
+			
+			return RegionSelectDescriptor.INTERSECTION_STRING;
+		} 
+		return CalculatingHistogramAction.NOCODE;
+	}
+	
 }

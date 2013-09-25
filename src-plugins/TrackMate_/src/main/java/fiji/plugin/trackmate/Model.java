@@ -54,13 +54,13 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
  * 
  * The list of Spot {@link FeatureFilter} that the user can set on any computed
  * feature. It will be used to filter spots and generate the
- * {@link #spotSelection} field, that will be used for tracking.
+ * {@link #regions} field, that will be used for tracking.
  * <p>
  * Since it only serves to determine the effect of a process (filtering spots by
  * feature), it logically could be a sub-field of the {@link #settings} object.
  * We found more convenient to have it attached to the model.
  * 
- * <h3>{@link #spotSelection}</h3>
+ * <h3>{@link #regions}</h3>
  * 
  * The filtered spot, as a new {@link SpotCollection}. It is important that this
  * collection is made with the same spot objects than for the {@link #spots} field.
@@ -68,7 +68,7 @@ import fiji.plugin.trackmate.visualization.TrackMateModelView;
  * <h3>{@link #graph}</h3>
  * 
  * The {@link SimpleDirectedWeightedGraph} that contains the map of links between spots.
- * The vertices of the graph are the content of the {@link #spotSelection}
+ * The vertices of the graph are the content of the {@link #regions}
  * field. This is the only convenient way to store links in their more general
  * way we have thought of.
  * <p>

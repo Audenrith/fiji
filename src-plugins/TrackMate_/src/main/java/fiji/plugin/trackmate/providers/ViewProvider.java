@@ -15,6 +15,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.threedhyperstack.ThreeDHyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
 
@@ -60,6 +61,7 @@ public class ViewProvider {
 		names = new ArrayList<String>(2);
 		names.add(HyperStackDisplayer.NAME);
 		names.add(SpotDisplayer3D.NAME);
+		names.add(ThreeDHyperStackDisplayer.NAME);
 	}
 
 	/**
@@ -85,6 +87,11 @@ public class ViewProvider {
 
 			return new SpotDisplayer3D(model, selectionModel, universe);
 
+
+		} else if (key.equals(ThreeDHyperStackDisplayer.NAME)) {
+
+			ImagePlus imp = settings.imp;
+			return new ThreeDHyperStackDisplayer(model, selectionModel, imp);
 
 		} else if (key.equals(TrackScheme.KEY)) {
 
@@ -121,6 +128,10 @@ public class ViewProvider {
 		} else if (key.equals(TrackScheme.KEY)) {
 
 			return TrackScheme.INFO_TEXT;
+
+		} else if (key.equals(ThreeDHyperStackDisplayer.NAME)) {
+
+			return ThreeDHyperStackDisplayer.INFO_TEXT;
 
 		} else {
 			return null;

@@ -192,8 +192,13 @@ public class SpotOverlay extends Roi {
 		}
 	}
 
+	public Spot getEditingSpot() {
+		return editingSpot;
+	}
 
-
+	public void setEditingSpot(Spot spot) {
+		editingSpot = spot;
+	}
 
 
 }

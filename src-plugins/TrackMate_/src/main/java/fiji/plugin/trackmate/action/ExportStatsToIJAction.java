@@ -48,6 +48,10 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 		final Model model = trackmate.getModel();
 		final FeatureModel fm = model.getFeatureModel();
 		
+		// Get regionImage to specify regions
+		int[][] regions = trackmate.getSettings().getRegionInts();
+				
+		
 		// Export spots
 		logger.log("  - Exporting spot statistics...");
 		Set<Integer> trackIDs = model.getTrackModel().trackIDs(true);
@@ -71,6 +75,9 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 					}
 					spotTable.addValue(feature, val.doubleValue());
 				}
+				int region = regions[spot.getFeature(Spot.POSITION_X).intValue()][spot.getFeature(Spot.POSITION_Y).intValue()];
+				spotTable.addValue("RegionNumber", region);
+				spotTable.addLabel("Region", trackmate.getSettings().getRegionCode(region));
 			}
 		}
 		logger.log(" Done.\n");
@@ -111,7 +118,7 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 
 		// Create table
 		ResultsTable trackTable = new ResultsTable();
-
+		
 		// Sort by track
 		for (Integer trackID : trackIDs) {
 			trackTable.incrementCounter();
@@ -124,6 +131,16 @@ public class ExportStatsToIJAction extends AbstractTMAction {
 					trackTable.addValue(feature, val);
 				}
 			}
+			
+			Set<Spot> spots = model.getTrackModel().trackSpots(trackID);
+			Spot[] spotArray = spots.toArray(new Spot[0]);
+			
+			int regionStart = regions[spotArray[0].getFeature(Spot.POSITION_X).intValue()][spotArray[0].getFeature(Spot.POSITION_Y).intValue()];
+			int regionEnd = regions[spotArray[spotArray.length-1].getFeature(Spot.POSITION_X).intValue()][spotArray[spotArray.length-1].getFeature(Spot.POSITION_Y).intValue()];
+			
+			trackTable.addValue("BeginRegion", regionStart);
+			trackTable.addValue("EndRegion", regionEnd);
+			trackTable.addValue("ChangeCode", trackmate.getSettings().getMovementCode(regionStart, regionEnd));
 		}
 		logger.log(" Done.\n");
 

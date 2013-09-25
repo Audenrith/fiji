@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.providers;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.imglib2.meta.ImgPlus;
+import net.imglib2.img.ImgPlus;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
@@ -11,6 +11,7 @@ import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
+
 
 /**
  * A provider for the spot analyzer factories provided in the GUI.
@@ -54,6 +55,7 @@ public class SpotAnalyzerProvider {
 		analyzerNames.add(SpotIntensityAnalyzerFactory.KEY);
 		analyzerNames.add(SpotContrastAndSNRAnalyzerFactory.KEY); // must be after the statistics one
 		analyzerNames.add(SpotRadiusEstimatorFactory.KEY);
+//	analyzerNames.add(SpotRegionAnalyzerFactory.KEY);
 	}
 
 	/**
@@ -72,6 +74,9 @@ public class SpotAnalyzerProvider {
 			
 		} else if (key.equals(SpotRadiusEstimatorFactory.KEY)) {
 			return new SpotRadiusEstimatorFactory(model, img);
+			
+//		} else if (key == SpotRegionAnalyzerFactory.KEY) {
+//			return new SpotRegionAnalyzerFactory(model, img);
 			
 		} else {
 			return null;

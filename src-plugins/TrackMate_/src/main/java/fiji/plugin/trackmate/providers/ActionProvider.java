@@ -6,6 +6,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 
 import fiji.plugin.trackmate.TrackMate;
+import fiji.plugin.trackmate.action.CalculatingHistogramAction;
 import fiji.plugin.trackmate.action.CaptureOverlayAction;
 import fiji.plugin.trackmate.action.CopyOverlayAction;
 import fiji.plugin.trackmate.action.ExportTracksToXML;
@@ -73,6 +74,7 @@ public class ActionProvider {
 		names.add(RadiusToEstimatedAction.NAME);
 		names.add(ResetRadiusAction.NAME);
 //		names.add(fiji.plugin.trackmate.action.ISBIChallengeExporter.NAME);
+		names.add(CalculatingHistogramAction.NAME);
 	}
 	
 	/**
@@ -114,6 +116,9 @@ public class ActionProvider {
 			
 		} else if (ISBIChallengeExporter.NAME.equals(key)) {
 			return new ISBIChallengeExporter(trackmate, controller);
+			
+		} else if (CalculatingHistogramAction.NAME.equals(key)) {
+			return new CalculatingHistogramAction(trackmate, controller);
 		}
 		
 		return null;
@@ -154,6 +159,9 @@ public class ActionProvider {
 			
 		} else if (ExportTracksToXML.NAME.equals(key)) {
 			return ExportTracksToXML.INFO_TEXT;
+			
+		} else if (CalculatingHistogramAction.NAME.equals(key)) {
+			return CalculatingHistogramAction.INFO_TEXT;
 		}
 		
 		return null;
@@ -193,6 +201,9 @@ public class ActionProvider {
 			
 		} else if (ExportTracksToXML.NAME.equals(key)) {
 			return ExportTracksToXML.ICON;
+			
+		} else if (CalculatingHistogramAction.NAME.equals(key)) {
+			return CalculatingHistogramAction.ICON;
 		}
 		
 		return null;

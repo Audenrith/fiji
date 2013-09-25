@@ -47,6 +47,7 @@ import fiji.plugin.trackmate.features.ModelFeatureUpdater;
 import fiji.plugin.trackmate.features.edges.EdgeAnalyzer;
 import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotRegionAnalyzerFactory;
 import fiji.plugin.trackmate.features.track.TrackAnalyzer;
 import fiji.plugin.trackmate.features.track.TrackIndexAnalyzer;
 import fiji.plugin.trackmate.gui.descriptors.ActionChooserDescriptor;
@@ -58,7 +59,10 @@ import fiji.plugin.trackmate.gui.descriptors.GrapherDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.InitFilterDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.LoadDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.LogPanelDescriptor;
+import fiji.plugin.trackmate.gui.descriptors.RegionSelectDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.SaveDescriptor;
+import fiji.plugin.trackmate.gui.descriptors.SegmentationChoiceDescriptor;
+import fiji.plugin.trackmate.gui.descriptors.SegmentationDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.SpotFilterDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.StartDialogDescriptor;
 import fiji.plugin.trackmate.gui.descriptors.TrackFilterDescriptor;
@@ -71,6 +75,7 @@ import fiji.plugin.trackmate.gui.panels.components.ColorByFeatureGUIPanel;
 import fiji.plugin.trackmate.providers.ActionProvider;
 import fiji.plugin.trackmate.providers.DetectorProvider;
 import fiji.plugin.trackmate.providers.EdgeAnalyzerProvider;
+import fiji.plugin.trackmate.providers.SegmentationProvider;
 import fiji.plugin.trackmate.providers.SpotAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackAnalyzerProvider;
 import fiji.plugin.trackmate.providers.TrackerProvider;
@@ -100,6 +105,7 @@ public class TrackMateGUIController implements ActionListener {
 	protected final TrackMateWizard gui;
 	protected final TrackMateGUIModel guimodel;
 
+	protected SegmentationProvider segmentationProvider;
 	protected SpotAnalyzerProvider spotAnalyzerProvider;
 	protected EdgeAnalyzerProvider edgeAnalyzerProvider;
 	protected TrackAnalyzerProvider trackAnalyzerProvider;
@@ -111,6 +117,9 @@ public class TrackMateGUIController implements ActionListener {
 	protected DetectorConfigurationDescriptor detectorConfigurationDescriptor;
 	protected DetectorChoiceDescriptor detectorChoiceDescriptor;
 	protected StartDialogDescriptor startDialoDescriptor;
+	protected SegmentationChoiceDescriptor segmentationChoiceDescriptor;
+	protected SegmentationDescriptor segmentationDescriptor;
+	protected RegionSelectDescriptor regionSelectDescriptor;
 	protected DetectionDescriptor detectionDescriptor;
 	protected InitFilterDescriptor initFilterDescriptor;
 	protected ViewChoiceDescriptor viewChoiceDescriptor;
@@ -295,6 +304,16 @@ public class TrackMateGUIController implements ActionListener {
 	}
 
 	/**
+	 * Returns the {@link SegmentationProvider} instance, serving
+	 * {@link SegmentationProvider}s to this GUI.
+	 * 
+	 * @return the segmentation provider.
+	 */
+	public SegmentationProvider getSegmentationProvider() {
+		return segmentationProvider;
+	}
+	
+	/**
 	 * Returns the {@link SpotAnalyzerProvider} instance, serving
 	 * {@link SpotAnalyzerFactory}s to this GUI.
 	 * 
@@ -356,13 +375,18 @@ public class TrackMateGUIController implements ActionListener {
 	}
 
 	protected void createProviders() {
-		spotAnalyzerProvider = new SpotAnalyzerProvider(trackmate.getModel());
+		segmentationProvider = new SegmentationProvider(trackmate.getModel());
+		spotAnalyzerProvider = new SpotAnalyzerProvider(trackmate.getModel());		
 		edgeAnalyzerProvider = new EdgeAnalyzerProvider(trackmate.getModel());
 		trackAnalyzerProvider = new TrackAnalyzerProvider(trackmate.getModel());
 		detectorProvider = new DetectorProvider(trackmate.getModel());
 		viewProvider = new ViewProvider(trackmate.getModel(), trackmate.getSettings(), selectionModel);
 		trackerProvider = new TrackerProvider(trackmate.getModel());
 		actionProvider = new ActionProvider(trackmate, this);
+		
+
+		// A little Hack to get the regionImage into the SpotRegionAnalyzerFactory
+		SpotRegionAnalyzerFactory.settings = trackmate.getSettings();
 	}
 
 	/**
@@ -394,6 +418,10 @@ public class TrackMateGUIController implements ActionListener {
 			}
 		});
 
+		segmentationChoiceDescriptor = new SegmentationChoiceDescriptor(segmentationProvider, trackmate, this);
+		segmentationDescriptor = new SegmentationDescriptor(this);		
+		regionSelectDescriptor = new RegionSelectDescriptor(this);
+		
 		/*
 		 * Choose detector
 		 */
@@ -552,7 +580,10 @@ public class TrackMateGUIController implements ActionListener {
 		descriptors.add(initFilterDescriptor);
 		descriptors.add(loadDescriptor);
 		descriptors.add(logPanelDescriptor);
+		descriptors.add(regionSelectDescriptor);
 		descriptors.add(saveDescriptor);
+		descriptors.add(segmentationChoiceDescriptor);
+		descriptors.add(segmentationDescriptor);
 		descriptors.add(spotFilterDescriptor);
 		descriptors.add(startDialoDescriptor);
 		descriptors.add(trackFilterDescriptor);
@@ -570,6 +601,15 @@ public class TrackMateGUIController implements ActionListener {
 	protected WizardPanelDescriptor nextDescriptor(final WizardPanelDescriptor currentDescriptor) {
 
 		if (currentDescriptor == startDialoDescriptor) {
+			return segmentationChoiceDescriptor;
+
+		} else if (currentDescriptor == segmentationChoiceDescriptor) {
+			return segmentationDescriptor;
+			
+		} else if (currentDescriptor == segmentationDescriptor) {
+			return regionSelectDescriptor;
+
+		} else if (currentDescriptor == regionSelectDescriptor) {
 			return detectorChoiceDescriptor;
 
 		} else if (currentDescriptor == detectorChoiceDescriptor) {
@@ -630,8 +670,17 @@ public class TrackMateGUIController implements ActionListener {
 		if (currentDescriptor == startDialoDescriptor) {
 			return null;
 
-		} else if (currentDescriptor == detectorChoiceDescriptor) {
+		} else if (currentDescriptor == segmentationChoiceDescriptor) {
 			return startDialoDescriptor;
+			
+		} else if (currentDescriptor == segmentationDescriptor) {
+			return segmentationChoiceDescriptor;
+
+		} else if (currentDescriptor == regionSelectDescriptor) {
+			return segmentationDescriptor;
+
+		} else if (currentDescriptor == detectorChoiceDescriptor) {
+			return regionSelectDescriptor;
 
 		} else if (currentDescriptor == detectorConfigurationDescriptor) {
 			return detectorChoiceDescriptor;
@@ -940,5 +989,11 @@ public class TrackMateGUIController implements ActionListener {
 			};
 		}.start();
 	}
+	
+	public void hideRegionWindow() {
+		regionSelectDescriptor.hideRegionImage();
+	}
+	
 
+	
 }

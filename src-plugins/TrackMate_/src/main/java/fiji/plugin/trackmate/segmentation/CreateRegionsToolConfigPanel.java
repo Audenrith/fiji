@@ -3,7 +3,6 @@ package fiji.plugin.trackmate.segmentation;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
-import ij.ImagePlus;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -30,11 +29,8 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
 import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
-import fiji.plugin.trackmate.util.ModelTools;
 
 public class CreateRegionsToolConfigPanel extends JFrame {
 	

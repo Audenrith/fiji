@@ -20,7 +20,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import net.imglib2.algorithm.Algorithm;
 import net.imglib2.algorithm.Benchmark;
 import net.imglib2.algorithm.MultiThreaded;
-import net.imglib2.img.ImgPlus;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.multithreading.SimpleMultiThreading;
 
 import org.jgrapht.graph.SimpleWeightedGraph;

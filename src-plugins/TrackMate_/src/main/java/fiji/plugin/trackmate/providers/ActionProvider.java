@@ -66,6 +66,7 @@ public class ActionProvider {
 		names.add(ExportTracksToXML.NAME);
 		names.add(ExtractTrackStackAction.NAME);
 		names.add(LinkNew3DViewerAction.NAME);
+		names.add(CalculatingHistogramAction.NAME);
 		names.add(CopyOverlayAction.NAME);
 		names.add(PlotNSpotsVsTimeAction.NAME);
 		names.add(CaptureOverlayAction.NAME);
@@ -74,7 +75,6 @@ public class ActionProvider {
 		names.add(RadiusToEstimatedAction.NAME);
 		names.add(ResetRadiusAction.NAME);
 //		names.add(fiji.plugin.trackmate.action.ISBIChallengeExporter.NAME);
-		names.add(CalculatingHistogramAction.NAME);
 	}
 	
 	/**
@@ -89,6 +89,9 @@ public class ActionProvider {
 			
 		} else if (LinkNew3DViewerAction.NAME.equals(key)) {
 			return new LinkNew3DViewerAction(trackmate, controller);
+			
+		} else if (CalculatingHistogramAction.NAME.equals(key)) {
+			return new CalculatingHistogramAction(trackmate, controller);
 			
 		} else if (CopyOverlayAction.NAME.equals(key)) {
 			return new CopyOverlayAction(trackmate, controller);
@@ -116,9 +119,6 @@ public class ActionProvider {
 			
 		} else if (ISBIChallengeExporter.NAME.equals(key)) {
 			return new ISBIChallengeExporter(trackmate, controller);
-			
-		} else if (CalculatingHistogramAction.NAME.equals(key)) {
-			return new CalculatingHistogramAction(trackmate, controller);
 		}
 		
 		return null;
@@ -135,6 +135,9 @@ public class ActionProvider {
 			
 		} else if (LinkNew3DViewerAction.NAME.equals(key)) {
 			return LinkNew3DViewerAction.INFO_TEXT;
+			
+		} else if (CalculatingHistogramAction.NAME.equals(key)) {
+			return CalculatingHistogramAction.INFO_TEXT;
 			
 		} else if (CopyOverlayAction.NAME.equals(key)) {
 			return CopyOverlayAction.INFO_TEXT;
@@ -159,9 +162,6 @@ public class ActionProvider {
 			
 		} else if (ExportTracksToXML.NAME.equals(key)) {
 			return ExportTracksToXML.INFO_TEXT;
-			
-		} else if (CalculatingHistogramAction.NAME.equals(key)) {
-			return CalculatingHistogramAction.INFO_TEXT;
 		}
 		
 		return null;
@@ -177,6 +177,9 @@ public class ActionProvider {
 			
 		} else if (LinkNew3DViewerAction.NAME.equals(key)) {
 			return LinkNew3DViewerAction.ICON;
+			
+		} else if (CalculatingHistogramAction.NAME.equals(key)) {
+			return CalculatingHistogramAction.ICON;
 			
 		} else if (CopyOverlayAction.NAME.equals(key)) {
 			return CopyOverlayAction.ICON;
@@ -201,9 +204,6 @@ public class ActionProvider {
 			
 		} else if (ExportTracksToXML.NAME.equals(key)) {
 			return ExportTracksToXML.ICON;
-			
-		} else if (CalculatingHistogramAction.NAME.equals(key)) {
-			return CalculatingHistogramAction.ICON;
 		}
 		
 		return null;

@@ -3,7 +3,7 @@ package fiji.plugin.trackmate.providers;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.imglib2.img.ImgPlus;
+import net.imglib2.meta.ImgPlus;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzer;
@@ -11,7 +11,6 @@ import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
-
 
 /**
  * A provider for the spot analyzer factories provided in the GUI.

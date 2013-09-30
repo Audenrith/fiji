@@ -1,12 +1,9 @@
 package fiji.plugin.trackmate.segmentation;
 
 import java.util.ArrayList;
-import java.util.Map;
 
-import net.imglib2.img.ImgPlus;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.Settings;
 import ij.ImagePlus;
 import ij.ImageStack;
 

@@ -17,8 +17,10 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import net.imglib2.img.ImagePlusAdapter;
+import net.imglib2.meta.AbstractTypedSpace;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
+import net.imglib2.meta.CalibratedAxis;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.ImgPlusMetadata;
 import net.imglib2.type.numeric.real.DoubleType;

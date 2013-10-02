@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.visualization.threedhyperstack;
+package fiji.plugin.trackmate.visualization.orthogonalview;
 
 import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
 import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
@@ -35,9 +35,8 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.gui.TrackMateWizard;
 import fiji.plugin.trackmate.gui.panels.components.JNumericTextField;
 import fiji.plugin.trackmate.util.ModelTools;
-import fiji.plugin.trackmate.visualization.orthogonalview.OrthogonalView;
 
-public class HyperstackSpotEditToolConfigPanel extends JFrame {
+public class CentralWindowEditToolConfigPanel extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
 	private final static ImageIcon ICON = new ImageIcon(TrackMateWizard.class.getResource("images/TrackIcon_small.png"));
@@ -51,9 +50,9 @@ public class HyperstackSpotEditToolConfigPanel extends JFrame {
 	private final Logger logger;
 	private JNumericTextField jNFQualityThreshold;
 	private JNumericTextField jNFDistanceTolerance;
-	private final HyperstackSpotEditTool parent;
+	private final CentralWindowSpotEditTool parent;
 
-	public HyperstackSpotEditToolConfigPanel(final HyperstackSpotEditTool parent) {
+	public CentralWindowEditToolConfigPanel(final CentralWindowSpotEditTool parent) {
 		this.parent = parent;
 		
 		/*
@@ -275,7 +274,7 @@ public class HyperstackSpotEditToolConfigPanel extends JFrame {
 		final ImagePlus imp = parent.imp;
 		if (imp == null)
 			return;
-		final ThreeDHyperStackDisplayer displayer = parent.displayers.get(imp);
+		final OrthogonalView displayer = parent.displayers.get(imp);
 		if (null == displayer)
 			return;
 		SelectionModel selectionModel = displayer.getSelectionModel();
@@ -286,7 +285,7 @@ public class HyperstackSpotEditToolConfigPanel extends JFrame {
 		final ImagePlus imp = parent.imp;
 		if (imp == null)
 			return;
-		final ThreeDHyperStackDisplayer displayer = parent.displayers.get(imp);
+		final OrthogonalView displayer = parent.displayers.get(imp);
 		if (null == displayer)
 			return;
 		SelectionModel selectionModel = displayer.getSelectionModel();
@@ -297,7 +296,7 @@ public class HyperstackSpotEditToolConfigPanel extends JFrame {
 		final ImagePlus imp = parent.imp;
 		if (imp == null)
 			return;
-		final ThreeDHyperStackDisplayer displayer = parent.displayers.get(imp);
+		final OrthogonalView displayer = parent.displayers.get(imp);
 		if (null == displayer)
 			return;
 		SelectionModel selectionModel = displayer.getSelectionModel();
@@ -321,7 +320,7 @@ public class HyperstackSpotEditToolConfigPanel extends JFrame {
 		final ImagePlus imp = parent.imp;
 		if (imp == null)
 			return;
-		final ThreeDHyperStackDisplayer displayer = parent.displayers.get(imp);
+		final OrthogonalView displayer = parent.displayers.get(imp);
 		if (null == displayer)
 			return;
 		Model model = displayer.getModel();

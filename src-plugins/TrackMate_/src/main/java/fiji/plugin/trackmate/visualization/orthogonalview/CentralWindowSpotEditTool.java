@@ -1,4 +1,4 @@
-package fiji.plugin.trackmate.visualization.threedhyperstack;
+package fiji.plugin.trackmate.visualization.orthogonalview;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -35,11 +35,10 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.semiauto.SemiAutoTracker;
 import fiji.plugin.trackmate.util.TMUtils;
-import fiji.plugin.trackmate.visualization.orthogonalview.OrthogonalView;
 import fiji.tool.AbstractTool;
 import fiji.tool.ToolWithOptions;
 
-public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, ToolWithOptions {
+public class CentralWindowSpotEditTool extends AbstractTool implements MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, ToolWithOptions {
 
 	private static final boolean DEBUG = false;
 
@@ -68,11 +67,11 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 	private static final double FALL_BACK_RADIUS = 5;
 
 
-	private static HyperstackSpotEditTool instance;
+	private static CentralWindowSpotEditTool instance;
 	/** Stores the edited spot in each {@link ImagePlus}. */
 	private HashMap<ImagePlus, Spot> editedSpots = new HashMap<ImagePlus, Spot>();
 	/** Stores the view possible attached to each {@link ImagePlus}. */
-	HashMap<ImagePlus, ThreeDHyperStackDisplayer> displayers = new HashMap<ImagePlus, ThreeDHyperStackDisplayer>();
+	HashMap<ImagePlus, OrthogonalView> displayers = new HashMap<ImagePlus, OrthogonalView>();
 	/** The radius of the previously edited spot. */
 	private Double previousRadius = null;
 	private Spot quickEditedSpot;
@@ -83,7 +82,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 
 	private Logger logger = Logger.VOID_LOGGER;
 
-	private HyperstackSpotEditToolConfigPanel configPanel;
+	private CentralWindowEditToolConfigPanel configPanel;
 	/**
 	 * The last {@link ImagePlus} on which an action happened.
 	 */
@@ -99,15 +98,15 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 	/**
 	 * Singleton
 	 */
-	private HyperstackSpotEditTool() {	}
+	private CentralWindowSpotEditTool() {	}
 
 	/**
 	 * Return the singleton instance for this tool. If it was not previously instantiated, this calls
 	 * instantiates it. 
 	 */
-	public static HyperstackSpotEditTool getInstance() {
+	public static CentralWindowSpotEditTool getInstance() {
 		if (null == instance) {
-			instance = new HyperstackSpotEditTool();
+			instance = new CentralWindowSpotEditTool();
 			if (DEBUG)
 				System.out.println("[SpotEditTool] Instantiating: "+instance);
 		}
@@ -154,7 +153,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 	 * Register the given {@link OrthogonalView}. If this method id not called, the tool will not
 	 * respond.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 	 */
-	public void register(final ImagePlus imp, final ThreeDHyperStackDisplayer displayer) {
+	public void register(final ImagePlus imp, final OrthogonalView displayer) {
 		
 		if (DEBUG) System.out.println("[SpotEditTool] Currently registered: " + displayers);
 
@@ -178,7 +177,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 	public void mouseClicked(MouseEvent e) {
 
 		final ImagePlus imp = getImagePlus(e);
-		final ThreeDHyperStackDisplayer displayer = displayers.get(imp);
+		final OrthogonalView displayer = displayers.get(imp);
 		if (DEBUG) {
 			System.out.println("[SpotEditTool] @mouseClicked");
 			System.out.println("[SpotEditTool] Got "+imp+ " as ImagePlus");
@@ -358,7 +357,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 	public void mouseDragged(MouseEvent e) {
 		final ImagePlus imp = getImagePlus(e);
 		final double[] calibration = TMUtils.getSpatialCalibration(imp);
-		final ThreeDHyperStackDisplayer displayer = displayers.get(imp);
+		final OrthogonalView displayer = displayers.get(imp);
 		if (null == displayer)
 			return;
 		Spot editedSpot = editedSpots.get(imp);
@@ -383,7 +382,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 			return;
 		final ImagePlus imp = getImagePlus(e);
 		final double[] calibration = TMUtils.getSpatialCalibration(imp);
-		final ThreeDHyperStackDisplayer displayer = displayers.get(imp);
+		final OrthogonalView displayer = displayers.get(imp);
 		if (null == displayer)
 			return;
 		Spot editedSpot = editedSpots.get(imp);
@@ -411,7 +410,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		final ImagePlus imp = getImagePlus(e);
-		final ThreeDHyperStackDisplayer displayer = displayers.get(imp);
+		final OrthogonalView displayer = displayers.get(imp);
 		if (null == displayer)
 			return;
 		Spot editedSpot = editedSpots.get(imp);
@@ -450,7 +449,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 		final ImagePlus imp = getImagePlus(e);
 		if (imp == null)
 			return;
-		final ThreeDHyperStackDisplayer displayer = displayers.get(imp);
+		final OrthogonalView displayer = displayers.get(imp);
 		if (null == displayer)
 			return;
 
@@ -799,7 +798,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 
 	}
 	
-	private Spot makeSpot(ImagePlus imp, ThreeDHyperStackDisplayer displayer, ImageCanvas canvas, Point mouseLocation) {
+	private Spot makeSpot(ImagePlus imp, OrthogonalView displayer, ImageCanvas canvas, Point mouseLocation) {
 		if (displayer == null) {
 			displayer = displayers.get(imp);
 		}
@@ -827,7 +826,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 			final ImagePlus imp = getImagePlus(e);
 			if (imp == null)
 				return;
-			final ThreeDHyperStackDisplayer displayer = displayers.get(imp);
+			final OrthogonalView displayer = displayers.get(imp);
 			if (null == displayer)
 				return;
 			Model model = displayer.getModel();
@@ -884,7 +883,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 	@Override
 	public void showOptionDialog() {
 		if (null == configPanel) {
-			configPanel = new HyperstackSpotEditToolConfigPanel(this);
+			configPanel = new CentralWindowEditToolConfigPanel(this);
 			configPanel.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e) {

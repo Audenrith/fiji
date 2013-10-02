@@ -15,6 +15,7 @@ import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import fiji.plugin.trackmate.visualization.orthogonalview.OrthogonalView;
 import fiji.plugin.trackmate.visualization.threedhyperstack.ThreeDHyperStackDisplayer;
 import fiji.plugin.trackmate.visualization.threedviewer.SpotDisplayer3D;
 import fiji.plugin.trackmate.visualization.trackscheme.TrackScheme;
@@ -58,7 +59,8 @@ public class ViewProvider {
 	 */
 	protected void registerViews() { // We do not put TrackScheme here. It has its own launcher in the last panel
 		// Names
-		names = new ArrayList<String>(2);
+		names = new ArrayList<String>(4);
+		names.add(OrthogonalView.NAME);
 		names.add(HyperStackDisplayer.NAME);
 		names.add(SpotDisplayer3D.NAME);
 		names.add(ThreeDHyperStackDisplayer.NAME);
@@ -70,7 +72,12 @@ public class ViewProvider {
 	 */
 	public TrackMateModelView getView(String key) {
 
-		if (key.equals(HyperStackDisplayer.NAME)) {
+		if (key.equals(OrthogonalView.NAME)) {
+
+			ImagePlus imp = settings.imp;
+			return new OrthogonalView(model, selectionModel, imp);
+
+		} else if (key.equals(HyperStackDisplayer.NAME)) {
 
 			ImagePlus imp = settings.imp;
 			return new HyperStackDisplayer(model, selectionModel, imp);
@@ -116,7 +123,11 @@ public class ViewProvider {
 	 */
 	public String getInfoText(String key) {
 		
-		if (key.equals(HyperStackDisplayer.NAME)) {
+		if (key.equals(OrthogonalView.NAME)) {
+
+			return OrthogonalView.INFO_TEXT;
+
+		} else if (key.equals(HyperStackDisplayer.NAME)) {
 
 			return HyperStackDisplayer.INFO_TEXT;
 

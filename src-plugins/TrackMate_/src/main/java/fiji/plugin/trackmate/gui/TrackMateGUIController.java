@@ -601,15 +601,6 @@ public class TrackMateGUIController implements ActionListener {
 	protected WizardPanelDescriptor nextDescriptor(final WizardPanelDescriptor currentDescriptor) {
 
 		if (currentDescriptor == startDialoDescriptor) {
-			return segmentationChoiceDescriptor;
-
-		} else if (currentDescriptor == segmentationChoiceDescriptor) {
-			return segmentationDescriptor;
-			
-		} else if (currentDescriptor == segmentationDescriptor) {
-			return regionSelectDescriptor;
-
-		} else if (currentDescriptor == regionSelectDescriptor) {
 			return detectorChoiceDescriptor;
 
 		} else if (currentDescriptor == detectorChoiceDescriptor) {
@@ -649,6 +640,15 @@ public class TrackMateGUIController implements ActionListener {
 			return trackFilterDescriptor;
 
 		} else if (currentDescriptor == trackFilterDescriptor) {
+			return segmentationChoiceDescriptor;
+
+		} else if (currentDescriptor == segmentationChoiceDescriptor) {
+			return segmentationDescriptor;
+			
+		} else if (currentDescriptor == segmentationDescriptor) {
+			return regionSelectDescriptor;
+
+		} else if (currentDescriptor == regionSelectDescriptor) {
 			return configureViewsDescriptor;
 
 		} else if (currentDescriptor == configureViewsDescriptor) {
@@ -669,19 +669,10 @@ public class TrackMateGUIController implements ActionListener {
 
 		if (currentDescriptor == startDialoDescriptor) {
 			return null;
-
-		} else if (currentDescriptor == segmentationChoiceDescriptor) {
+			
+		} else if (currentDescriptor == detectorChoiceDescriptor) {
 			return startDialoDescriptor;
 			
-		} else if (currentDescriptor == segmentationDescriptor) {
-			return segmentationChoiceDescriptor;
-
-		} else if (currentDescriptor == regionSelectDescriptor) {
-			return segmentationDescriptor;
-
-		} else if (currentDescriptor == detectorChoiceDescriptor) {
-			return regionSelectDescriptor;
-
 		} else if (currentDescriptor == detectorConfigurationDescriptor) {
 			return detectorChoiceDescriptor;
 
@@ -691,8 +682,17 @@ public class TrackMateGUIController implements ActionListener {
 		} else if (currentDescriptor == initFilterDescriptor) {
 			return detectionDescriptor;
 
-		} else if (currentDescriptor == viewChoiceDescriptor) {
+		} else if (currentDescriptor == segmentationChoiceDescriptor) {
 			return detectorConfigurationDescriptor;
+			
+		} else if (currentDescriptor == segmentationDescriptor) {
+			return segmentationChoiceDescriptor;
+
+		} else if (currentDescriptor == regionSelectDescriptor) {
+			return segmentationDescriptor;
+			
+		} else if (currentDescriptor == viewChoiceDescriptor) {
+			return regionSelectDescriptor;
 
 		} else if (currentDescriptor == spotFilterDescriptor) {
 			return viewChoiceDescriptor;

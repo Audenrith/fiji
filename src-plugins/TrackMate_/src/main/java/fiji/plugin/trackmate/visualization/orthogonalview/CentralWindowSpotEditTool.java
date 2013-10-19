@@ -44,7 +44,7 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 
 	private static final double COARSE_STEP = 2;
 	private static final double FINE_STEP = 0.2f;
-	private static final String TOOL_NAME = "Spot edit tool";
+	private static final String TOOL_NAME = "Central Window Spot edit tool";
 	private static final String TOOL_ICON ="CdffL10e0"
 			+ "CafdD01C67aD11C6aaD21C6fbL31e1CbfeDf1"
 			+ "CaedD02C64aD12C35aD22C5fbD32C6fbL42e2CbfdDf2"
@@ -88,9 +88,10 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 	 */
 	ImagePlus imp;
 	
+	//TODO TEST
+	protected boolean update = true;
 	
-
-
+	
 	/*
 	 * CONSTRUCTOR
 	 */
@@ -98,7 +99,8 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 	/**
 	 * Singleton
 	 */
-	private CentralWindowSpotEditTool() {	}
+	private CentralWindowSpotEditTool() {
+	}
 
 	/**
 	 * Return the singleton instance for this tool. If it was not previously instantiated, this calls
@@ -108,10 +110,10 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 		if (null == instance) {
 			instance = new CentralWindowSpotEditTool();
 			if (DEBUG)
-				System.out.println("[SpotEditTool] Instantiating: "+instance);
+				System.out.println("[CentralWindowSpotEditTool] Instantiating: "+instance);
 		}
 		if (DEBUG)
-			System.out.println("[SpotEditTool] Returning instance: "+instance);
+			System.out.println("[CentralWindowSpotEditTool] Returning instance: "+instance);
 		return instance;
 	}
 
@@ -155,20 +157,60 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 	 */
 	public void register(final ImagePlus imp, final OrthogonalView displayer) {
 		
-		if (DEBUG) System.out.println("[SpotEditTool] Currently registered: " + displayers);
+		if (DEBUG) System.out.println("[CentralWindowSpotEditTool] Currently registered: " + displayers);
 
 		if (displayers.containsKey(imp)) {
 			unregisterTool(imp);
-			if (DEBUG) System.out.println("[SpotEditTool] De-registering " + imp + " as tool listener.");
+			if (DEBUG) System.out.println("[CentralWindowSpotEditTool] De-registering " + imp + " as tool listener.");
 		}
 
 		displayers.put(imp, displayer);
 		if (DEBUG) {
-			System.out.println("[SpotEditTool] Registering "+imp+" and "+displayer + "." +
+			System.out.println("[CentralWindowSpotEditTool] Registering "+imp+" and "+displayer + "." +
 					" Currently registered: " + displayers);
 		}
 	}
 
+	@Override
+	public void imageUpdated(ImagePlus imp){
+
+		final OrthogonalView displayer = displayers.get(imp);
+		
+		
+		if (update) {
+			if (displayer.originalOverlay.isImp(imp)) {
+				// Source is Original Image
+				int slice = imp.getCurrentSlice() - 1;
+				displayer.setOverlayPosition(
+						displayer.originalOverlay.focusX, 
+						displayer.originalOverlay.focusY,
+						slice);
+			} else if (displayer.horizontalOverlay.isImp(imp)) {
+				// Source is Horizontal Image
+				int slice = imp.getCurrentSlice() - 1;
+				displayer.setOverlayPosition(
+						displayer.horizontalOverlay.direction.x(displayer.horizontalOverlay.focusX, displayer.horizontalOverlay.focusY, slice),
+						displayer.horizontalOverlay.direction.y(displayer.horizontalOverlay.focusX, displayer.horizontalOverlay.focusY, slice),
+						displayer.horizontalOverlay.direction.z(displayer.horizontalOverlay.focusX, displayer.horizontalOverlay.focusY, slice));
+			} else if (displayer.verticalOverlay.isImp(imp)) {
+				// Source is Vertical Image
+				int slice = imp.getCurrentSlice() - 1;
+				displayer.setOverlayPosition(
+						displayer.verticalOverlay.direction.x(displayer.verticalOverlay.focusX, displayer.verticalOverlay.focusY, slice),
+						displayer.verticalOverlay.direction.y(displayer.verticalOverlay.focusX, displayer.verticalOverlay.focusY, slice),
+						displayer.verticalOverlay.direction.z(displayer.verticalOverlay.focusX, displayer.verticalOverlay.focusY, slice));
+			}
+		}
+			
+		
+	}
+	
+	
+	
+	
+	
+	
+	
 	/*
 	 * MOUSE AND MOUSE MOTION
 	 */
@@ -179,12 +221,12 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 		final ImagePlus imp = getImagePlus(e);
 		final OrthogonalView displayer = displayers.get(imp);
 		if (DEBUG) {
-			System.out.println("[SpotEditTool] @mouseClicked");
-			System.out.println("[SpotEditTool] Got "+imp+ " as ImagePlus");
-			System.out.println("[SpotEditTool] Matching displayer: "+displayer);
+			System.out.println("[CentralWindowSpotEditTool] @mouseClicked");
+			System.out.println("[CentralWindowSpotEditTool] Got "+imp+ " as ImagePlus");
+			System.out.println("[CentralWindowSpotEditTool] Matching displayer: "+displayer);
 
 			for (MouseListener ml : imp.getCanvas().getMouseListeners()) {
-				System.out.println("[SpotEditTool] mouse listener: "+ml);
+				System.out.println("[CentralWindowSpotEditTool] mouse listener: "+ml);
 			}
 
 		}
@@ -192,6 +234,7 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 		if (null == displayer)
 			return;
 
+		
 		final Spot clickLocation = makeSpot(imp, displayer, getImageCanvas(e), e.getPoint());
 		final int frame = displayer.imp.getFrame() - 1;
 		final Model model = displayer.getModel();
@@ -199,6 +242,26 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 		Spot editedSpot = editedSpots.get(imp);
 
 		SelectionModel selectionModel = displayer.getSelectionModel();
+				
+		if (displayer.originalOverlay.isImp(imp)) {
+			// Source is Original Image
+			int slice = imp.getCurrentSlice() - 1;
+			displayer.setOverlayPosition(e.getPoint().x, e.getPoint().y,slice);
+		} else if (displayer.horizontalOverlay.isImp(imp)) {
+			// Source is Horizontal Image
+			int slice = imp.getCurrentSlice() - 1;
+			displayer.setOverlayPosition(
+					displayer.horizontalOverlay.direction.x(e.getPoint().x, e.getPoint().y, slice),
+					displayer.horizontalOverlay.direction.y(e.getPoint().x, e.getPoint().y, slice),
+					displayer.horizontalOverlay.direction.z(e.getPoint().x, e.getPoint().y, slice));
+		} else if (displayer.verticalOverlay.isImp(imp)) {
+			// Source is Vertical Image
+			int slice = imp.getCurrentSlice() - 1;
+			displayer.setOverlayPosition(
+					displayer.verticalOverlay.direction.x(e.getPoint().x, e.getPoint().y, slice),
+					displayer.verticalOverlay.direction.y(e.getPoint().x, e.getPoint().y, slice),
+					displayer.verticalOverlay.direction.z(e.getPoint().x, e.getPoint().y, slice));
+		}
 		
 		
 		
@@ -264,12 +327,12 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 				displayer.refresh();
 				// Edit spot
 				if (DEBUG)
-					System.out.println("[SpotEditTool] mouseClicked: Set "+editedSpot+" as editing spot for this imp.");
+					System.out.println("[CentralWindowSpotEditTool] mouseClicked: Set "+editedSpot+" as editing spot for this imp.");
 
 			} else {
 				// We leave editing mode
 				if (DEBUG)
-					System.out.println("[SpotEditTool] mouseClicked: Got "+editedSpot+" as editing spot for this imp, leaving editing mode.");
+					System.out.println("[CentralWindowSpotEditTool] mouseClicked: Got "+editedSpot+" as editing spot for this imp, leaving editing mode.");
 
 
 				// A hack: we update the current z and t of the edited spot to the current one, 
@@ -444,7 +507,7 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 	public void keyPressed(KeyEvent e) { 
 
 		if (DEBUG) 
-			System.out.println("[SpotEditTool] keyPressed: "+e.getKeyChar());
+			System.out.println("[CentralWindowSpotEditTool] keyPressed: "+e.getKeyChar());
 
 		final ImagePlus imp = getImagePlus(e);
 		if (imp == null)
@@ -817,7 +880,7 @@ public class CentralWindowSpotEditTool extends AbstractTool implements MouseMoti
 	@Override
 	public void keyReleased(KeyEvent e) { 
 		if (DEBUG) 
-			System.out.println("[SpotEditTool] keyReleased: "+e.getKeyChar());
+			System.out.println("[CentralWindowSpotEditTool] keyReleased: "+e.getKeyChar());
 
 		switch(e.getKeyCode()) {
 		case KeyEvent.VK_SPACE: {

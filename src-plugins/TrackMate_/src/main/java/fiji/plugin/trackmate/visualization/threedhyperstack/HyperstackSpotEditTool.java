@@ -45,7 +45,7 @@ public class HyperstackSpotEditTool extends AbstractTool implements MouseMotionL
 
 	private static final double COARSE_STEP = 2;
 	private static final double FINE_STEP = 0.2f;
-	private static final String TOOL_NAME = "Spot edit tool";
+	private static final String TOOL_NAME = "Hyperstack Spot edit tool";
 	private static final String TOOL_ICON ="CdffL10e0"
 			+ "CafdD01C67aD11C6aaD21C6fbL31e1CbfeDf1"
 			+ "CaedD02C64aD12C35aD22C5fbD32C6fbL42e2CbfdDf2"

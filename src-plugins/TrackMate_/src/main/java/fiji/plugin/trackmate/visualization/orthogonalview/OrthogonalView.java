@@ -21,12 +21,11 @@ import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.SpotEditTool;
 import fiji.plugin.trackmate.visualization.hyperstack.SpotOverlay;
 import fiji.plugin.trackmate.visualization.hyperstack.TrackOverlay;
 import fiji.util.gui.OverlayedImageCanvas;
 
-public class OrthogonalView extends AbstractTrackMateModelView  {
+public class OrthogonalView extends AbstractTrackMateModelView{
 
 	private static final boolean DEBUG = false;
 	public static final String NAME = "OrthogonalView Displayer";
@@ -71,11 +70,11 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 	
 	protected TrackOverlay trackOverlay;
 
-	private CentralWindowSpotEditTool editTool;
+	//private CentralWindowSpotEditTool editTool;
 	private Roi initialROI;
 	private Roi verticalROI, horizontalROI;
 	
-	
+	private CentralWindowSpotEditTool editTool;
 	
 	
 	OverlayedImageCanvas hyperstackCanvas;
@@ -99,16 +98,25 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 		}
 				
 		this.spotOverlay = createSpotOverlay();
+		this.originalOverlay = createOriginalOverlay();
 		this.verticalOverlay = createVerticalOverlay();
 		this.horizontalOverlay = createHorizontalOverlay();
-		this.originalOverlay = createOriginalOverlay();
-		
+
+		positionOverlayList.add(originalOverlay);
 		positionOverlayList.add(verticalOverlay);
 		positionOverlayList.add(horizontalOverlay);
-		positionOverlayList.add(originalOverlay);
 		
 		this.trackOverlay = createTrackOverlay(); 
 		
+		
+		//controller.getGuimodel().addView(mainView);
+		
+		/*if (SpotEditTool.isLaunched()) {
+			SpotEditTool.getInstance().imageClosed(imp);
+		}
+		if (this.imp.isVisible()) {
+			this.imp.hide();
+		}*/
 	}
 
 	public OrthogonalView(final Model model, final SelectionModel selectionModel) {
@@ -131,7 +139,7 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 	}
 
 	protected PositionOverlay createOriginalOverlay() {
-		return new PositionOverlay(model, verticalImage, displaySettings, PositionOverlay.Direction.VERTICAL);
+		return new PositionOverlay(model, imp, displaySettings, PositionOverlay.Direction.ORIGINAL);
 	}
 
 	protected PositionOverlay createHorizontalOverlay() {
@@ -139,7 +147,7 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 	}
 
 	protected PositionOverlay createVerticalOverlay() {
-		return new PositionOverlay(model, imp, displaySettings, PositionOverlay.Direction.ORIGINAL);
+		return new PositionOverlay(model, verticalImage, displaySettings, PositionOverlay.Direction.VERTICAL);
 	}
 	
 	/**
@@ -216,16 +224,15 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 		long z = Math.round(spot.getFeature(Spot.POSITION_Z) / dz  ) + 1;
 		imp.setPosition(1, (int) z, frame+1);
 		
-		setOverlayPosition(spot.getDoublePosition(1), spot.getDoublePosition(2), spot.getDoublePosition(3));
 	}
-	
-
-
-	//TODO Hier fortfahren
-	
-	
+		
 	@Override
 	public void render() {
+		initialROI = imp.getRoi();
+		if (initialROI != null) {
+			imp.killRoi();
+		}
+		
 		verticalROI = verticalImage.getRoi();
 		if (verticalROI!= null) {
 			verticalImage.killRoi();
@@ -236,10 +243,7 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 			horizontalImage.killRoi();
 		}
 		
-		initialROI = imp.getRoi();
-		if (initialROI != null) {
-			imp.killRoi();
-		}
+		
 
 		
 		
@@ -249,10 +253,10 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 			imp.show();
 		}
 
+		addOverlay(originalOverlay);
 		addOverlay(spotOverlay);
 		addOverlay(trackOverlay);
 		imp.updateAndDraw();
-		registerEditTool();
 		
 		
 		verticalImage.setOpenAsHyperStack(true);
@@ -269,7 +273,12 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 		
 		verticalImage.updateAndDraw();
 		horizontalImage.updateAndDraw();
+		
+		registerEditTool();
 	}
+
+
+
 
 	@Override
 	public void refresh() { 
@@ -294,7 +303,7 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 		overlay.clear();
 		if (initialROI != null) {
 			imp.getOverlay().add(initialROI);
-			imp.getOverlay().add(originalOverlay);
+		//	imp.getOverlay().add(originalOverlay);
 		}
 		
 		overlay = verticalImage.getOverlay();
@@ -332,7 +341,6 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 
 	public void addOverlay(Roi overlay) {
 		imp.getOverlay().add(overlay);
-		imp.getOverlay().add(originalOverlay);
 	}
 
 	public void addPositionOverlay() {
@@ -350,12 +358,14 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 
 	private void registerEditTool() {
 		editTool = CentralWindowSpotEditTool.getInstance();
-		if (!SpotEditTool.isLaunched())
+		if (!CentralWindowSpotEditTool.isLaunched())
 			editTool.run("");
 		else {
 			editTool.imageOpened(imp);
 		}
 		editTool.register(imp, this);
+		editTool.register(verticalImage, this);
+		editTool.register(horizontalImage, this);
 	}
 
 	@Override
@@ -424,11 +434,30 @@ public class OrthogonalView extends AbstractTrackMateModelView  {
 		
 	}
 	
-	private void setOverlayPosition(double x,
-			double y, double z) {
+	public void setOverlayPosition(double x, double y, double z) {
 		for (PositionOverlay po: positionOverlayList) {
 			po.setPosition((int)x, (int)y, (int)z);
 		}
+		
+		if (DEBUG) {			
+			System.out.println("verticalOverlay: "+verticalOverlay.focusX+", "+verticalOverlay.focusY+", "+verticalOverlay.focusZ);
+			System.out.println("horizontalOverlay: "+horizontalOverlay.focusX+", "+horizontalOverlay.focusY+", "+horizontalOverlay.focusZ);
+			System.out.println("originalOverlay: "+originalOverlay.focusX+", "+originalOverlay.focusY+", "+originalOverlay.focusZ);
+		}
+		
+		updatePosition();
 	}
 	
+	public void updatePosition() {
+		editTool.update = false;
+		for (PositionOverlay po: positionOverlayList) {
+			po.update();
+		}
+		editTool.update = true;
+	}
+	
+	public void setSlice(double z) {
+		
+	}
+
 }

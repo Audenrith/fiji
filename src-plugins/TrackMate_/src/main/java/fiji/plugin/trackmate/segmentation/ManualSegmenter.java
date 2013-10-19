@@ -12,7 +12,6 @@ import java.util.List;
 
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.visualization.hyperstack.SpotEditTool;
 import fiji.util.gui.OverlayedImageCanvas;
 
 public class ManualSegmenter implements Segmenter{
@@ -333,13 +332,15 @@ public class ManualSegmenter implements Segmenter{
 
 		image.setOpenAsHyperStack(true);
 		
+		// TODO IS THIS NECCESSARY?
+		/* 
 		editTool = CreateRegionsTool.getInstance();
 		if (!SpotEditTool.isLaunched()) {
 			editTool.run("");
 			editTool.imageUpdated(image); 
 		} else {
 			editTool.imageUpdated(image);
-		}
+		}*/
 
 		
 		

@@ -7,7 +7,6 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.gui.LogPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
-import fiji.plugin.trackmate.segmentation.ManualSegmenter;
 
 public class SegmentationDescriptor implements WizardPanelDescriptor {
 	
@@ -51,22 +50,26 @@ public class SegmentationDescriptor implements WizardPanelDescriptor {
 		
 		
 		final Settings settings = trackmate.getSettings();
-		logger.getLogger().log("Starting segmentation using "+settings.segmenter.getKey()+"\n", Logger.BLUE_COLOR);
-		new Thread("SegmentationThread") {					
-			public void run() {
-				long start = System.currentTimeMillis();
-				//try {
-					trackmate.execSegmentation();
-				//} catch (Exception e) {
-				//	logger.getLogger().error("An error occured:\n"+e+'\n');
-				//	e.printStackTrace(logger.getLogger());
-				//} finally {
-					controller.getGUI().setNextButtonEnabled(true);
-					long end = System.currentTimeMillis();
-					logger.getLogger().log(String.format("Segmentation done in %.1f s.\n", (end-start)/1e3f), Logger.BLUE_COLOR);
-				//}
-			}
-		}.start();
+		
+		if (settings.segmenter!=null) {
+			logger.getLogger().log("Starting segmentation using "+settings.segmenter.getKey()+"\n", Logger.BLUE_COLOR);
+			new Thread("SegmentationThread") {					
+				public void run() {
+					long start = System.currentTimeMillis();
+					//try {
+						trackmate.execSegmentation();
+					//} catch (Exception e) {
+					//	logger.getLogger().error("An error occured:\n"+e+'\n');
+					//	e.printStackTrace(logger.getLogger());
+					//} finally {
+						controller.getGUI().setNextButtonEnabled(true);
+						long end = System.currentTimeMillis();
+						logger.getLogger().log(String.format("Segmentation done in %.1f s.\n", (end-start)/1e3f), Logger.BLUE_COLOR);
+					//}
+				}
+			}.start();
+		}
+		
 	}
 
 	@Override

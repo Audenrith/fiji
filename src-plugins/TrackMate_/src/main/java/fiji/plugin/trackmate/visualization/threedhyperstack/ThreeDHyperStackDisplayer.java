@@ -19,7 +19,6 @@ import fiji.plugin.trackmate.visualization.AbstractTrackMateModelView;
 import fiji.plugin.trackmate.visualization.TrackColorGenerator;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.ViewUtils;
-import fiji.plugin.trackmate.visualization.hyperstack.SpotEditTool;
 import fiji.plugin.trackmate.visualization.hyperstack.SpotOverlay;
 import fiji.plugin.trackmate.visualization.hyperstack.TrackOverlay;
 import fiji.util.gui.OverlayedImageCanvas;
@@ -294,7 +293,7 @@ public class ThreeDHyperStackDisplayer extends AbstractTrackMateModelView  {
 
 	private void registerEditTool() {
 		editTool = HyperstackSpotEditTool.getInstance();
-		if (!SpotEditTool.isLaunched())
+		if (!HyperstackSpotEditTool.isLaunched())
 			editTool.run("");
 		else {
 			editTool.imageOpened(imp);
